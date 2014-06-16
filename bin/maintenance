@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+APP_PATH = File.expand_path('../../config/application',  __FILE__)
+require_relative '../config/boot'
+require_relative '../config/environment'
+
+ttl = 30
+
+until ttl == 0 do
+  puts "#{ttl}"
+
+  Session.active.each {|session|
+    session.flash :alert, "Server shutting down in #{ttl} seconds."
+    session.save
+  }
+
+  sleep(1)
+
+  ttl -= 1
+end
+
+Session.active.each {|session|
+  # clear flash messages so visitors don't
+  # see the last one next time they sign on
+  session.data['flash'] = nil
+  session.save
+}
